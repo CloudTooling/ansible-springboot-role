@@ -1,13 +1,14 @@
+---
 name: Release Chart
 
-on:
+true:
   workflow_dispatch:
     inputs:
-        releaseversion:
-            description: 'Release version'
-            required: true
-            type: string
-            default: "X.Y.Z"
+      releaseversion:
+        description: Release version
+        required: true
+        type: string
+        default: X.Y.Z
 
 jobs:
   release:
@@ -32,13 +33,13 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
           check-latest: true
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.6.1
 
       - name: Run chart-testing (lint)
-        run: ct lint --config .ct.yaml 
+        run: ct lint --config .ct.yaml
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
@@ -46,7 +47,7 @@ jobs:
           charts_dir: .
           config: .cr.yaml
         env:
-          CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         run: |
@@ -69,12 +70,12 @@ jobs:
           env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      -   name: Add release of codelists zip to github release
-          uses: actions/upload-release-asset@v1
-          env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-              upload_url: ${{ steps.tag-and-release.outputs.upload_url }}
-              asset_path: codelists/target/codelists-${{ github.event.inputs.releaseversion }}.jar
-              asset_name: 3rdpartyGenCode-codelists.jar
-              asset_content_type: application/zip
+      - name: Add release of codelists zip to github release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.tag-and-release.outputs.upload_url }}
+          asset_path: codelists/target/codelists-${{ github.event.inputs.releaseversion }}.jar
+          asset_name: 3rdpartyGenCode-codelists.jar
+          asset_content_type: application/zip

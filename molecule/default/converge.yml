@@ -6,10 +6,11 @@
   vars:
     springboot_dist_file: ../../example/files/spring-petclinic.jar
 
-
   pre_tasks:
-    - name: Update apt cache.
-      apt: update_cache=yes cache_valid_time=600
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
       when: ansible_os_family == 'Debian'
       changed_when: false
 
@@ -22,7 +23,9 @@
       when: ansible_os_family == 'RedHat'
 
     - name: Install cron (Debian).
-      apt: name=cron state=present
+      apt:
+        name: cron
+        state: present
       when: ansible_os_family == 'Debian'
 
   roles:

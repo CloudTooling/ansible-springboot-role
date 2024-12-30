@@ -53,4 +53,4 @@ rules:
 ignore: |
   .venv/
   .git/
-  .gitlab-ci.yml
+  .ansible-lint

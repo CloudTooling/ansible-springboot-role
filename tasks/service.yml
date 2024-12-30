@@ -1,18 +1,18 @@
 ---
-
-- name: "Ensure systemd system directory is present (for Ubuntu)"
+- name: Ensure systemd system directory is present (for Ubuntu)
   file:
     path: "{{ sysd_user_services_folder }}"
+    mode: "0644"
     state: directory
     owner: root
     group: root
 
-- name: "Create systemd service file"
+- name: Create systemd service file
   template:
     src: app.service.j2
     dest: "{{ sysd_script }}"
-    mode: 0644
+    mode: "0644"
     owner: "{{ springboot_user }}"
     group: "{{ springboot_group }}"
   notify:
-    - "Restart application"
+    - Restart application

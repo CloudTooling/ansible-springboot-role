@@ -1,7 +1,7 @@
 ---
-- name: "Restart application"
+- name: Restart application
   systemd:
     name: "{{ springboot_application_name }}"
-    enabled: yes
-    daemon-reload: yes
+    enabled: true
+    daemon-reload: true
     state: restarted
