@@ -1,0 +1,23 @@
+---
+
+- name: Install app
+  include_tasks: spring.yml
+
+- name: Install as service
+  include_tasks: service.yml
+
+- name: Flush handlers before wait
+  meta: flush_handlers
+
+- name: Wait until appication is available
+  uri:
+    url: '{{ springboot_application_url }}/actuator/health'
+    return_content: yes
+    validate_certs: no
+    status_code:
+      - 200
+      - 401
+  until: uri_output.status == 200 or uri_output.status == 401
+  retries: 24 # Retries for 24 * 5 seconds = 120 seconds = 2 minutes
+  delay: 5 # Every 5 seconds
+  register: uri_output

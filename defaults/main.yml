@@ -1,0 +1,28 @@
+---
+# Install java by default. Optional
+springboot_java_install: true
+
+# Mandatory variable : path to springboot dist to deploy.
+springboot_dist_file:
+
+# Mandatory variable : spring boot application name
+springboot_application_name: None
+
+# Optional : you can specify a template file to manage you app properties
+springboot_propertyfile_template: None
+
+# Optional : you can specify a template file to manage you app configuration
+# (see : https://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html#deployment-script-customization-when-it-runs)
+springboot_configuration_template: None
+
+# Deploy folder
+springboot_deploy_folder: /opt/{{ springboot_application_name }}
+
+# linux user to start the service
+springboot_user: javadev
+
+# linux group to start the service
+springboot_group: javadev
+
+# extra files/directories to copy
+extra_files: []
