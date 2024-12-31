@@ -1,7 +1,7 @@
 ---
-galaxy_info:galaxy_info:
+galaxy_info:
   role_name: springboot
-  namespace: CloudTooling
+  namespace: cloudtooling
   author: martin@m13t.de
   description: Installs SpringBoot App under Linux
   company: m13t
