@@ -13,7 +13,7 @@
 - name: Create deploy folder if not exists
   file:
     path: "{{ springboot_deploy_folder }}"
-    mode: "0644"
+    mode: "0744"
     state: directory
     owner: "{{ springboot_user }}"
     group: "{{ springboot_group }}"
@@ -21,7 +21,7 @@
 - name: Copy dist archive
   unarchive:
     src: "{{ springboot_dist_file }}"
-    dest: "{{ springboot_deploy_folder | dirname }}"
+    dest: "{{ springboot_deploy_folder }}"
     owner: "{{ springboot_user }}"
     group: "{{ springboot_group }}"
   notify:
