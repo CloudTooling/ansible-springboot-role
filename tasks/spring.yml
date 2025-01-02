@@ -43,13 +43,5 @@
     mode: "0644"
     owner: "{{ springboot_user }}"
     group: "{{ springboot_group }}"
-  vars:
-    # pass same dummy defaults
-    signing_portal_base_path: https://admin.secsigntest.com/rest/signatureportal/v1/
-    signing_portal_user: dummy
-    signing_portal_password: dummy
-    signing_options_companystamptext: Bunge Beratung
-    signing_options_sealconfigid: 1
-    signing_options_sigpos: dummy object
   notify:
     - Restart application
