@@ -1,7 +1,4 @@
 ---
-# Install java by default. Optional
-springboot_java_install: true
-
 # Mandatory variable : path to springboot dist to deploy.
 springboot_dist_file:
 # Mandatory variable : spring boot application name

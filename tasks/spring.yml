@@ -21,7 +21,7 @@
 - name: Copy dist archive
   unarchive:
     src: "{{ springboot_dist_file }}"
-    dest: /opt
+    dest: "{{ springboot_deploy_folder | dirname }}"
     owner: "{{ springboot_user }}"
     group: "{{ springboot_group }}"
   notify:
