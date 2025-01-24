@@ -23,6 +23,8 @@ Create a *requirements.yml* refering to this role and a *playbook.yml*, e.g.:
 ```
 You also need to provide a `springboot_configuration_template` which will be used as config template.
 
+>**NOTE**: The ZIP file 
+
 Within your CI/CD pipeline just run the playbook then, e.g. via GH action: 
 ```
 -   name: Setup key for deployment

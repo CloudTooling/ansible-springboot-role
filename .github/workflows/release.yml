@@ -1,72 +1,70 @@
-name: Release Chart
+name: Create release # You may choose a different name
+run-name: ${{ inputs.releaseversion }} # Enumerates entries in the "workflow runs" view
 on:
   workflow_dispatch:
     inputs:
       releaseversion:
-        description: Release version
+        description: "Release version"
         required: true
         type: string
-        default: X.Y.Z
+        default: "X.Y.Z"
+
 jobs:
-  release:
-    # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
-    # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
+  release: # Arbitrarily chosen
+    name: Release
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+      packages: write
+      attestations: write
+      id-token: write
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
-          check-latest: true
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.7.0
-      - name: Run chart-testing (lint)
-        run: ct lint --config .ct.yaml
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          charts_dir: .
-          config: .cr.yaml
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
         env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to GitHub Container Registry
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Configure Git author
         run: |
-          echo ${{ secrets.CT_OCI_GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
-      - name: Push Charts to GHCR
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
+
+      - name: Write version vars
         run: |
-          for pkg in .cr-release-packages/*; do
-            if [ -z "${pkg:-}" ]; then
-              break
-            fi
-            helm push "${pkg}" oci://ghcr.io/cloudtooling/helm-charts
-          done
-          -   name: tag-and-release
-          id: tag-and-release
-          uses: avakar/tag-and-release@v1
-          with:
-              release_name: ${{ github.event.inputs.releaseversion }}
-              tag_name: ${{ github.event.inputs.releaseversion }}
-              draft: true
-          env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Add release of codelists zip to github release
-        uses: actions/upload-release-asset@v1
+          echo "{\"version\":\"${{ github.event.inputs.releaseversion }}\"}" | jq > config.json
+
+      - name: Conventional Changelog Action
+        uses: TriPSs/conventional-changelog-action@v6
+        with:
+          input-file: CHANGELOG.md
+          github-token: ${{ steps.app-token.outputs.token }}
+          version-file: config.json
+          pre-release: true
+          skip-bump: true
+          skip-tag: true
+          skip-on-empty: true
+          tag-prefix: "v"
+
+      - name: Create Release on GH
+        id: tag-and-release
+        uses: avakar/tag-and-release@v1
+        with:
+          draft: true
+          release_name: ${{ github.event.inputs.releaseversion }}
+          tag_name: v${{ github.event.inputs.releaseversion }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.tag-and-release.outputs.upload_url }}
-          asset_path: codelists/target/codelists-${{ github.event.inputs.releaseversion }}.jar
-          asset_name: 3rdpartyGenCode-codelists.jar
-          asset_content_type: application/zip
